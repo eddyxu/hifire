@@ -1,0 +1,10 @@
+*.swp
+*.o
+suite
+hifire
+*.log
+.svn
+*.in
+tags
+Makefile
+*.tmp
