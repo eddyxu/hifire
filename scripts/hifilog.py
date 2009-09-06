@@ -1,0 +1,215 @@
+#!/usr/bin/env python
+#
+# Maniplate hifire's log 
+#
+# Author: U{Lei Xu<mailto:lxu@cse.unl.edu>}
+# 
+# Copyright: 2009 (c) University of Nebraska - Lincoln
+# License: New BSD License
+#
+# $Id: hifilog.py 23 2009-08-31 21:14:38Z eddyxu $
+#
+
+"""This script provides tools for analyze hifire's log
+"""
+
+import sys
+import optparse 
+import math
+import numpy as np
+
+def log_file(fobj, comment="#"):
+    """Iterate log file
+    """
+    for line in fobj:
+        line = line.strip()
+        if not line or line[0] == comment:
+            continue
+
+        yield line
+
+    fobj.close()
+
+def extract_columes():
+    """Extract several columes, act as "awk"
+    """
+    parser = optparse.OptionParser()
+    parser.add_option("-c", "--columes", dest="cols", 
+        help="define the columes that need to be extract.")
+    parser.add_option("-t", "--threshold", dest="thresh", 
+        help="define the threshold of error that is reasonable.")
+    parser.add_option("-j", "--join", dest="join", 
+        help="join string", default=" ")
+
+    (options, args) = parser.parse_args()
+    cols = options.cols
+    if not cols:
+        parser.print_help()
+        sys.exit(0)
+
+    if len(args) == 0:
+        filepath = "result.log"
+    else:
+        filepath = args[0]
+
+    cols = cols.split(",")
+    cols = map(int, cols)
+    if options.thresh:
+        thresh = float(options.thresh)
+    else:
+        thresh = 0 
+    for line in log_file(open(filepath)):
+        result = []
+        datas = map(float, line.split(","))
+        for colume in cols:
+            value = datas[colume]
+            if len(cols) == 1 and thresh > 0 and value >= thresh:
+                break
+            result.append("%f" % value)
+        if result:
+            print options.join.join(result)
+
+
+def get_stat_info(fobj, bins, err_col=3):
+    """Read statistic information from one log file
+    """
+    data = np.loadtxt(fobj, delimiter=',', 
+        converters = {err_col: lambda s: float(s) * 10 ** 6}, usecols=(3,))
+    histo, bins = np.histogram(data, bins)
+    return histo
+
+def stat_result():
+    """Stat the error time for result
+
+    TODO: use get_stat_info 
+    """
+    parser = optparse.OptionParser("%prog st|stat [options] FILE...")
+    parser.add_option("-b", "--bins", dest="bins", help="set bins")
+    options, args = parser.parse_args()
+    if len(args) == 0:
+        fobj = sys.stdin
+    else:
+        fobj = open(args[0])
+
+    count = 0
+    if options.bins:
+        thresholds = options.bins
+    else:
+        thresholds = [1, 10, 20, 50, 100, 200, 500]
+    counters = [ 0 for i in range(len(thresholds) + 1) ]
+
+    total_error = 0
+    for line in log_file(fobj):
+        datas = line.strip().split(",")
+        var_time = math.fabs(float(datas[3]))
+        total_error += var_time
+        i = 0
+        for tvalue in thresholds:
+            if var_time <= tvalue * (0.1 ** 6):  # micro second
+                counters[i] += 1
+                break
+            i += 1
+                
+        if i == len(thresholds):
+            counters[i] += 1
+        count += 1
+
+    print("Total I/O: %d, Avarage start time error: %f" % 
+        (count, total_error / count))
+    for tvalue in thresholds:
+        tc = counters[thresholds.index(tvalue)]
+        print "< %d microsec: %d(%%%f)" % (tvalue, tc, float(tc)/float(count) * 100)
+
+    print(" > %d micorsec: %d(%%%f)" % 
+        (thresholds[-1], counters[-1], float(counters[-1])/count * 100))
+
+    
+def print_help():
+    """Print out help information
+    """
+    print("""%s [command] [options] FILE
+Supported commands:
+  ex|extract
+  st|stat
+  best\t\tfigure out best result.
+  iops\t\tcalculate I/O per second from the file.
+  help\t\tdisplay this help
+  """ % sys.argv[0])
+
+
+def best_result():
+    """Get best result from several result files
+    """
+    parser = optparse.OptionParser(usage="%prog best [options] FILES...")
+    options, args = parser.parse_args()
+    if( len(args) < 2 ):
+        parser.error("Missing arguments: required at least two files")
+        
+    best_file = None
+    best_ratio = 0
+    for logfile in args:
+        hist = get_stat_info(logfile, [0, 10, 20, 50, 100, 200, 500, 1000000])
+        total = sum(hist)
+        ratio = float(hist[0] + hist[1]) / total
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_file = logfile 
+
+    print("Best result( %f %% ): %s" % ( best_ratio, best_file ))
+
+
+def iops():
+    """
+    """
+    parser = optparse.OptionParser(usage="%prog iops [options] FILE")
+    parser.add_option("-c", "--column", dest="column", type="int", default=0,
+        help="set timestamp colume in trace file")
+    parser.add_option("-o", "--output", dest="output", metavar="FILE", 
+        help="set output file")
+    parser.add_option("--delimiter", dest="delimiter", help="set delimiter",
+        default=",")
+    options, args = parser.parse_args()
+    if not args:
+        parser.error("Missing arguments")
+    fname = args[0]
+    datas = np.loadtxt(fname, delimiter=",", usecols=(options.column,))
+    datas = map(int, datas)
+    results = {}
+    for ts in datas:
+        try:
+            results[ts] += 1
+        except KeyError:
+            results[ts] = 1
+
+    seconds = results.keys()
+    seconds.sort()
+    for sec in seconds:
+        print("%d%s%d" % (sec, options.delimiter, results[sec]))
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        stat_result()
+        sys.exit(0)
+
+    method_map = { "help" : print_help,
+        "stat" : stat_result,
+        "st" : stat_result, # alias
+        "extract" : extract_columes,
+        "ex" : extract_columes, # alias
+        "best" : best_result,
+        "iops" : iops,
+    }
+    command = sys.argv[1]
+    sys.argv.remove(command)
+    if command in ['-h', '--help', 'help']:
+        print_help() 
+        sys.exit(0)
+
+    if command not in method_map.keys():
+        print("Unknown command: %s" % command)
+        print_help()
+        sys.exit(0)
+
+    method = method_map[command]
+    method()
+

@@ -9,7 +9,7 @@ LIBSRC = \
 		 thread_pool_sched.cpp thread_pool_sched.h \
 		 trace.cpp trace.h 
 
-AM_CXXFLAGS = -O2 -Wall
+AM_CXXFLAGS = -O3 -DNDEBUG -Wall 
 bin_PROGRAMS = hifire
 hifire_SOURCES = hifire.cpp hifire.h ${LIBSRC} 
 
