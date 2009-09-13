@@ -60,7 +60,7 @@ protected:
 
 	Device * device() { return device_; }
 
-	int create_threads();
+	int create_threads(void * thread_func(void *) = worker);
 
 	int join_threads();
 

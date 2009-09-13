@@ -103,7 +103,7 @@ BaseSched::batch_worker(void * data)
 }
 
 int
-BaseSched::create_threads() 
+BaseSched::create_threads(void * thread_func(void *))
 {
 	pthread_attr_t child_attr;
 	pthread_attr_init(&child_attr);
