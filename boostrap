@@ -1,0 +1,10 @@
+#!/bin/sh
+# 
+#  Set up develop/compile environment for HiFiRe
+#
+#  $Id: boostrap 7 2009-08-11 05:00:09Z eddyxu $
+
+aclocal
+autoheader
+autoconf
+automake --add-missing

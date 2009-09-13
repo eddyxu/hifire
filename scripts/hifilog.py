@@ -78,13 +78,47 @@ def get_stat_info(fobj, bins, err_col=3):
     histo, bins = np.histogram(data, bins)
     return histo
 
+def stat_source():
+    """Analyze input trace characteristic 
+    """
+    parser = optparse.OptionParser(usage="%prog source|src [options] FILE")
+    parser.add_option('-b', '--bins', dest='bins', help='set statistic bins')
+    parser.add_option("--latex", action="store_true", default="false", 
+        dest="latex", help="generate latex output")
+    options, args = parser.parse_args()
+    if not args:
+        fobj = sys.stdin
+    else:
+        fobj = open(args[0])
+
+    size_bins = [ 2 ** x * 1024 for x in xrange(1, 10) ]
+    size_bins.insert(0,0)
+    size_bins.append(1024 * 1024 * 4)
+    datas = np.loadtxt(fobj, delimiter=',', usecols=(2,))
+    histo, bins = np.histogram(datas, size_bins)
+    total_count = sum(histo)
+
+    if options.latex:
+        print("\\begin{tabular}[ht]{|c|r|r|}")
+        for bin, value in zip(size_bins[:-1], histo):
+            percentage = float(value) / total_count * 100
+            print("    \hline")
+            print("    %s & %s & %%%s \\\\" % (bin, value, percentage))
+
+        print("\hline")
+        print("\\end{tabular}")
+    else:
+        pass
+
+        
+    
 def stat_result():
     """Stat the error time for result
-
-    TODO: use get_stat_info 
     """
     parser = optparse.OptionParser("%prog st|stat [options] FILE...")
     parser.add_option("-b", "--bins", dest="bins", help="set bins")
+    parser.add_option("--latex", action="store_true", default="false", 
+        dest="latex", help="print out output in latex format")
     options, args = parser.parse_args()
     if len(args) == 0:
         fobj = sys.stdin
@@ -101,6 +135,7 @@ def stat_result():
     total_error = 0
     for line in log_file(fobj):
         datas = line.strip().split(",")
+           
         var_time = math.fabs(float(datas[3]))
         total_error += var_time
         i = 0
@@ -124,17 +159,6 @@ def stat_result():
         (thresholds[-1], counters[-1], float(counters[-1])/count * 100))
 
     
-def print_help():
-    """Print out help information
-    """
-    print("""%s [command] [options] FILE
-Supported commands:
-  ex|extract
-  st|stat
-  best\t\tfigure out best result.
-  iops\t\tcalculate I/O per second from the file.
-  help\t\tdisplay this help
-  """ % sys.argv[0])
 
 
 def best_result():
@@ -186,30 +210,68 @@ def iops():
     for sec in seconds:
         print("%d%s%d" % (sec, options.delimiter, results[sec]))
 
-if __name__ == "__main__":
+
+def latex_output(datas, ):
+    """Generate latex output
+    """
+    pass
+
+
+def print_help():
+    """Print out help information
+    """
+    print("""%s [command] [options] FILE
+Supported commands:
+  ex|extract
+  st|stat
+  best\t\tfigure out best result.
+  iops\t\tcalculate I/O per second from the file.
+  help\t\tdisplay this help
+  version\t\tdisplay version information
+  """ % sys.argv[0])
+
+
+def version():
+    """Print out version information
+    """
+    print("""%s -- 0.0.1 \n
+Bug report to Lei Xu <lxu@cse.unl.edu>""" % sys.argv[0])
+
+def main():
     if len(sys.argv) < 2:
         stat_result()
         sys.exit(0)
 
     method_map = { "help" : print_help,
-        "stat" : stat_result,
-        "st" : stat_result, # alias
-        "extract" : extract_columes,
-        "ex" : extract_columes, # alias
+        "stat|st" : stat_result,
+        "extract|ex" : extract_columes,
         "best" : best_result,
-        "iops" : iops,
+        "iops|io" : iops,
+        "source|src" : stat_source,
     }
     command = sys.argv[1]
     sys.argv.remove(command)
     if command in ['-h', '--help', 'help']:
         print_help() 
         sys.exit(0)
+    if command in ['-v', '--version', 'version']:
+        version()
+        sys.exit(0)
 
-    if command not in method_map.keys():
+    method = None
+    for method_name in method_map.keys():
+        names = method_name.split("|")
+        if command in names:
+            method = method_map[method_name]
+            break
+
+    if not method:
         print("Unknown command: %s" % command)
         print_help()
         sys.exit(0)
 
-    method = method_map[command]
     method()
+
+if __name__ == "__main__":
+    main()
 

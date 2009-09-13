@@ -1,0 +1,75 @@
+.\" Manpage for hifire
+.\" 
+.\" $Id: hifire.1 43 2009-08-10 16:07:40Z lxu $
+.TH HIFIRE 1  "August 10, 2009" "version 0.1.0" "USER COMMANDS"
+.SH NAME
+.B hifire 
+\- A strategy\-based I/O replayer
+.SH SYNOPSIS
+.B hifire
+[\-h] [\-v] [options] 
+.I device
+.SH DESCRIPTION
+.B hifire 
+is a flexibile and accuraty I/O trace replay tool, which is designed for scalable accurately replaying
+file system trace from both device level and file system level.
+
+.SH OPTIONS
+.TP 
+\-h, --help
+display help
+.TP 
+\-v, --version
+display version information
+.TP 
+\-f, --file=\fIFILE\f
+set input trace file
+.TP
+\-o, --output=\fIFILE\f
+set output file( default "result.log" )
+.TP
+\-c, --capacity=\fINUM\f
+set device capacity(KB)
+.TP
+\---max-operations=\fINUN\f	
+set max number of entries for replaying.
+.TP
+\---max-time=\fINUM\f
+set max time for replaying.
+.TP
+\-i, --time-scale=\fINUM\f
+set time scale( default 1, faster 2+ ). 
+Use this parameter to set hifire running the trace how many times faster.
+.TP
+\-a, --range-scale=\fINUM\f
+set range scale( default 1, bigger 2+ ).
+This parameter is used for enlarge the bytes of each trace entry. 
+
+.SS Performance options:
+.TP
+\-z, --thread-num=\fINUM\f	
+set the number of total threads working in this program.
+.TP
+\-p, --policy\f
+Scheduler policy. Currently, hifire only supports "afap"(as fast as possible) and 
+"pool"(thread-pool) scheduler. The default schduler is thread pool.
+
+.SH EXAMPLES
+
+.TP
+Run hifire with 8 threads and default schduler ( "pool" ).
+.B hifire --thread-num 8 --input Finance1.spc /dev/sdc
+.TP 
+Run hifire with 4 threads, "afap" scheduler, 2 times faster and customized result file.
+.B hifire --thread-num 4 --policy afap --time-range 2.0 --input Finance1.spc --output result-4thds-afap-2.0faster.log /dev/sdc
+
+
+
+.SH BUGS
+To report bugs to author, <lxu@cse.unl.edu>
+.SH AUTHOR
+Written by Lei Xu <lxu@cse.unl.edu>
+.\".SH HISTORY
+.SH SEE ALSO 
+.BR iozone(1),postmark(1),bonnie(1)
+
