@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <pthread.h>
+
 #include "thread_pool_sched.h"
 #include "configure.h"
 #include "trace.h"
@@ -33,19 +34,13 @@ ThreadPoolSched::run(Trace & trace)
 		return -1;
 	}
 
-	double curr_time = 0;
 	double pre_spin = Config::instance()->pre_spin();
 	Trace::iterator iter = trace.begin();
 	
-	start_time(SysInfo::cur_time());
-	while(iter.hasNext()) {
+	start_time( SysInfo::cur_time() );
+	while( iter.hasNext() ) {
 		IOEvent * event = iter.next();
-		while(1) { // spin time checking
-			curr_time = SysInfo::cur_time() - start_time();
-			if(curr_time >= event->trace_time - pre_spin)
-				break;
-		}
-
+		wait_until( event->trace_time, pre_spin );
 		//event->insert_time = curr_time;
 		queue()->push(event);
 	}

@@ -15,6 +15,7 @@
 #include <sys/types.h>
 
 #include <pthread.h>
+#include "sysinfo.h"
 
 class Config;
 class Device;
@@ -69,6 +70,21 @@ protected:
 	static void * batch_worker(void * data);
 
 	threads_type threads_;
+
+	/** 
+	 * Spin wait until trace_time is satisfied
+	 *
+	 * \return  actual start time
+	 */
+	void wait_until(double trace_time, double pre_spin) { 
+		double cur_time;
+		double spin_time = trace_time - pre_spin ;
+		while(1) {
+			cur_time = SysInfo::cur_time() - start_time();
+			if( cur_time > spin_time )
+				break;
+		}
+	}
 private:
 	void *buffer_;
 	int devfd_;
