@@ -3,13 +3,14 @@
  *
  * \author		Lei Xu <lxu@cse.unl.edu>
  *
- * $Id: sysinfo.cpp 18 2009-08-14 06:13:11Z eddyxu $
+ * $Id: sysinfo.cpp 25 2010-01-28 22:02:41Z eddyxu $
  *
  * License: New BSD License
  *
  * Copyright: 2009 (c) CSCE department of University of Nebraska-Lincoln
  */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>

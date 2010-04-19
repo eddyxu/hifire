@@ -3,7 +3,7 @@
  *
  * \author		Lei Xu <lxu@cse.unl.edu>
  *
- * $Id: event_queue.h 7 2009-08-11 05:00:09Z eddyxu $
+ * $Id: event_queue.h 24 2009-12-25 01:45:02Z eddyxu $
  */
 
 #ifndef _HIFIRE_EVENT_QUEUE_H_

@@ -3,9 +3,10 @@
  *
  * \author		Lei Xu <lxu@cse.unl.edu>
  *
- * $Id: device.cpp 5 2009-08-11 04:21:14Z eddyxu $
+ * $Id: device.cpp 25 2010-01-28 22:02:41Z eddyxu $
  */
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

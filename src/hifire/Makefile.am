@@ -6,6 +6,7 @@ LIBSRC = \
 		 configure.cpp configure.h \
 		 device.cpp device.h \
 		 sysinfo.cpp sysinfo.h \
+		 spin_sched.cpp spin_sched.h \
 		 thread_pool_sched.cpp thread_pool_sched.h \
 		 trace.cpp trace.h 
 

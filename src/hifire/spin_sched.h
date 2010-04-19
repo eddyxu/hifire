@@ -3,7 +3,7 @@
  *
  * \author		Lei Xu <lxu@cse.unl.edu>
  *
- * $Id$
+ * $Id: spin_sched.h 24 2009-12-25 01:45:02Z eddyxu $
  *
  * License: New BSD License
  */
@@ -19,8 +19,9 @@ public:
 	~SpinSched();
 	int run(Trace & trace);
 private:
-	void * spin_worker(void * data);
+	static void * spin_worker(void * data);
 
-	Trace & trace_;
+	Trace * trace_;
 };
 
+#endif /* _HIFIRE_SPIN_SCHED_H_ */

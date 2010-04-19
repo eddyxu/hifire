@@ -5,7 +5,7 @@
  *
  * \author		Lei Xu <lxu@cse.unl.edu>
  *
- * $Id: trace.cpp 18 2009-08-14 06:13:11Z eddyxu $
+ * $Id: trace.cpp 24 2009-12-25 01:45:02Z eddyxu $
  */
 
 #include <assert.h>

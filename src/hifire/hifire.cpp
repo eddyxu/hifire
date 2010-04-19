@@ -3,9 +3,10 @@
  *
  * \author		Lei Xu <lxu@cse.unl.edu>
  *
- * $Id: hifire.cpp 5 2009-08-11 04:21:14Z eddyxu $
+ * $Id: hifire.cpp 25 2010-01-28 22:02:41Z eddyxu $
  */
 
+#include <stdio.h>
 #include "base_sched.h"
 #include "afap_sched.h"
 #include "thread_pool_sched.h"
