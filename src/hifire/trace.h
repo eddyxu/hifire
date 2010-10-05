@@ -52,26 +52,26 @@ struct IOEvent {
 
 
 class EventBlock {
-public:
-	static const size_t BLOCKSIZE = 512 * 1024; // 512K
-	EventBlock(size_t capacity = BLOCKSIZE) : capacity_(capacity), size_(0) {
-		events_ = new IOEvent[capacity];
-	}
+ public:
+  static const size_t BLOCKSIZE = 512 * 1024; // 512K
+  EventBlock(size_t capacity = BLOCKSIZE) : capacity_(capacity), size_(0) {
+    events_ = new IOEvent[capacity];
+  }
 
-	~EventBlock() { delete[] events_; };
+  ~EventBlock() { delete[] events_; };
 
-	void push_back(const IOEvent & event) {
-		assert(size_ < capacity_);
-		events_[size_] = event;	
-		size_ ++;
-	}
-	size_t size() { return size_; }
-	bool full() { return size_ == capacity_; }
-	IOEvent * begin() { return events_; }
-private:
-	IOEvent * events_;
-	size_t capacity_;
-	size_t size_;
+  void push_back(const IOEvent & event) {
+    assert(size_ < capacity_);
+    events_[size_] = event;	
+    size_ ++;
+  }
+  size_t size() { return size_; }
+  bool full() { return size_ == capacity_; }
+  IOEvent * begin() { return events_; }
+ private:
+  IOEvent * events_;
+  size_t capacity_;
+  size_t size_;
 };
 
 /**
